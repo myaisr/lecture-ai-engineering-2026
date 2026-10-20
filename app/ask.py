@@ -11,6 +11,10 @@
 """
 
 import argparse
+import json
+from datetime import datetime
+from pathlib import Path
+from time import perf_counter
 
 from google import genai
 from google.genai import errors
@@ -19,14 +23,37 @@ from app.config import MODEL, api_error_message, get_api_key
 
 # 講座に固有の質問。正しい答えは data/glossary.json の homework-levels にある
 DEFAULT_QUESTION = "AIE2026の講座の宿題にある「3レベル」とは何ですか？"
+USAGE_LOG_PATH = Path(__file__).resolve().parents[1] / "data" / "ask_history.json"
 
 
 def ask(question: str) -> str:
     client = genai.Client(api_key=get_api_key())
+    started_at = perf_counter()
     response = client.models.generate_content(model=MODEL, contents=question)
+    response_time_seconds = perf_counter() - started_at
+    usage = response.usage_metadata
+    if usage is not None:
+        print(
+            f"[usage] 入力: {usage.prompt_token_count} tokens / "
+            f"出力: {usage.candidates_token_count} tokens"
+        )
 
-    # TODO(第1回 演習): response.usage_metadata から
-    #   入力トークン数と出力トークン数を表示してみよう（Copilotに頼んでよい）
+    entry = {
+        "answered_at": datetime.now().astimezone().isoformat(),
+        "model": MODEL,
+        "response_time_seconds": round(response_time_seconds, 3),
+        "input_tokens": usage.prompt_token_count if usage is not None else None,
+        "output_tokens": usage.candidates_token_count if usage is not None else None,
+    }
+    if USAGE_LOG_PATH.exists():
+        entries = json.loads(USAGE_LOG_PATH.read_text(encoding="utf-8"))
+    else:
+        entries = []
+    entries.append(entry)
+    USAGE_LOG_PATH.write_text(
+        json.dumps(entries, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     return response.text
 
