@@ -1,0 +1,23 @@
+[
+  {
+    "answered_at": "2026-10-20T11:58:01.683101+00:00",
+    "model": "gemini-3.5-flash-lite",
+    "response_time_seconds": 3.43,
+    "input_tokens": 7,
+    "output_tokens": 642
+  },
+  {
+    "answered_at": "2026-10-20T11:58:13.786238+00:00",
+    "model": "gemini-3.5-flash",
+    "response_time_seconds": 11.349,
+    "input_tokens": 7,
+    "output_tokens": 611
+  },
+  {
+    "answered_at": "2026-10-20T11:58:52.830925+00:00",
+    "model": "gemini-3.1-flash-lite",
+    "response_time_seconds": 38.31,
+    "input_tokens": 7,
+    "output_tokens": 795
+  }
+]
